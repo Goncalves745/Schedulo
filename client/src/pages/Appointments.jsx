@@ -71,7 +71,7 @@ function Booking() {
     setIsLoading(true);
 
     try {
-      const response = await Api.post("/appointments/create", {
+      const response = await Api.post("/business/appointments/create", {
         service_id: selectedService,
         date: selectedDate,
         time: selectedTime,

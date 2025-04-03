@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Calendar,
@@ -11,12 +11,33 @@ import {
   ChevronDown,
   Menu,
   X,
+  Clock,
 } from "lucide-react";
+import Api from "../api/axios";
 
 function Dashboard() {
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("overview");
+  const [appointments, setAppointments] = useState([]);
+
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
+
+  const fetchAppointments = async () => {
+    try {
+      const res = await Api.get("/business/appointments", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setAppointments(res.data.appointments);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const handleLogout = async (event) => {
     event.preventDefault();
@@ -211,8 +232,34 @@ function Dashboard() {
           )}
 
           {/* Placeholder content for other sections */}
-          {activeSection === "appointments" &&
-            navigate("/dashboard/appointments")}
+
+          {activeSection === "appointments" && (
+            <div className="grid gap-4">
+              {appointments.map((appointment) => (
+                <React.Fragment key={appointment.id}>
+                  <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <Scissors className="h-5 w-5 text-gray-400" />
+                      <span className="font-medium text-gray-900">
+                        {appointment.client_name}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <Clock className="h-4 w-4" />
+                        <span>{appointment.service?.duration_min} min</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <span>
+                          {new Date(appointment.date).toLocaleString("pt-PT")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </React.Fragment>
+              ))}
+            </div>
+          )}
 
           {activeSection === "services" && navigate("/business/services")}
 

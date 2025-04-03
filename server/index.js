@@ -17,7 +17,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/business", businessRoutes);
 app.use("/api/business/services", servicesRoutes);
-app.use("/api/appointments", appointmentsRoutes);
+app.use("/api/business/appointments", appointmentsRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor a correr em http://localhost:${PORT}`);

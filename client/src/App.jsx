@@ -31,7 +31,7 @@ function App() {
           }
         />
         <Route
-          path="/dashboard/appointments"
+          path="/business/appointments"
           element={
             <ProtectedRoute>
               <Appointments />
