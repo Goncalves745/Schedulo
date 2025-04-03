@@ -41,7 +41,7 @@ function Register() {
     }
 
     try {
-      const response = await Api.post("/auth/register", {
+      const response = await Api.post("/auth/signup", {
         business_name: formData.businessName,
         email: formData.email,
         password: formData.password,

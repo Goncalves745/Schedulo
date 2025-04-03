@@ -22,7 +22,7 @@ function App() {
           }
         />
         <Route
-          path="/dashboard/services"
+          path="/business/services"
           element={
             <ProtectedRoute>
               <Services />

@@ -5,16 +5,44 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const saltRounds = 10;
 
+const generateSlug = async (name) => {
+  const base = name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // remove acentos
+    .replace(/\s+/g, "-") // espaços por hífens
+    .replace(/[^a-z0-9-]/g, ""); // remove símbolos
+
+  let slug = base;
+  let count = 1;
+
+  while (await prisma.business.findUnique({ where: { slug } })) {
+    slug = `${base}-${count}`;
+    count++;
+  }
+
+  return slug;
+};
+
 const signup = async (req, res) => {
-  const name = req.body.name;
-  const email = req.body.email;
-  const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
+  const { business_name, email, password, phone, address } = req.body;
+  const slug = await generateSlug(business_name);
+
+  const passwordHash = await bcrypt.hash(req.body.password, saltRounds);
   try {
     await prisma.user.create({
       data: {
-        name,
+        name: business_name, // ou pode ser name separado
         email,
-        passwordHash: hashedPassword,
+        passwordHash,
+        business: {
+          create: {
+            name: business_name,
+            location: address,
+            phone,
+            slug: slug,
+          },
+        },
       },
     });
     res.status(201).json({ message: "Utilizador criado com sucesso!" });

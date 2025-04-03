@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import Api from "../api/axios";
-import { Scissors, Plus, Trash2, Clock, DollarSign } from "lucide-react";
+import {
+  Scissors,
+  Plus,
+  Trash2,
+  Clock,
+  DollarSign,
+  ArrowLeft,
+} from "lucide-react";
 
 function Services() {
   const [services, setServices] = useState([]);
@@ -41,6 +48,7 @@ function Services() {
       setError("Failed to delete service. Please try again.");
     }
   };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
@@ -69,6 +77,7 @@ function Services() {
       setIsLoading(false);
     }
   };
+
   useEffect(() => {
     fetchServices();
   }, []);
@@ -76,6 +85,14 @@ function Services() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
       <div className="max-w-4xl mx-auto">
+        <a
+          href="/dashboard"
+          className="inline-flex items-center text-indigo-600 hover:text-indigo-500 mb-6"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Dashboard
+        </a>
+
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
           <div className="flex items-center gap-3 mb-6">
             <Scissors className="h-8 w-8 text-indigo-600" />
@@ -83,12 +100,14 @@ function Services() {
               Service Management
             </h1>
           </div>
-        </div>{" "}
+        </div>
+
         {error && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
             {error}
           </div>
         )}
+
         <form
           onSubmit={handleSubmit}
           className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8"
@@ -135,6 +154,7 @@ function Services() {
             Add Service
           </button>
         </form>
+
         {isLoading ? (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
