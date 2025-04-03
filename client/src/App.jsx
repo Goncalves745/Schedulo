@@ -5,6 +5,7 @@ import Services from "./pages/Services";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Landing from "./pages/Landing";
+import Appointments from "./pages/Appointments";
 import "./index.css";
 function App() {
   return (
@@ -26,6 +27,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Services />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/appointments"
+          element={
+            <ProtectedRoute>
+              <Appointments />
             </ProtectedRoute>
           }
         />

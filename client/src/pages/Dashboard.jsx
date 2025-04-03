@@ -211,14 +211,8 @@ function Dashboard() {
           )}
 
           {/* Placeholder content for other sections */}
-          {activeSection === "appointments" && (
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">
-                Appointments Calendar
-              </h2>
-              <p className="text-gray-600">Calendar view coming soon...</p>
-            </div>
-          )}
+          {activeSection === "appointments" &&
+            navigate("/dashboard/appointments")}
 
           {activeSection === "services" && navigate("/business/services")}
 
