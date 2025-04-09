@@ -17,7 +17,7 @@ function Register() {
     password: "",
     confirmPassword: "",
     phone: "",
-    address: "",
+    location: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -35,7 +35,7 @@ function Register() {
     setLoading(true);
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      setError("As palavras-passe não coincidem");
       setLoading(false);
       return;
     }
@@ -46,17 +46,17 @@ function Register() {
         email: formData.email,
         password: formData.password,
         phone: formData.phone,
-        address: formData.address,
+        location: formData.location,
       });
 
       // Store the token
       localStorage.setItem("token", response.data.token);
 
       // Redirect to dashboard
-      window.location.href = "/dashboard";
+      window.location.href = "/login";
     } catch (err) {
       setError(
-        err.response?.data?.message || "An error occurred during registration"
+        err.response?.data?.message || "Ocorreu um erro durante o registo"
       );
     } finally {
       setLoading(false);
@@ -72,16 +72,16 @@ function Register() {
             className="inline-flex items-center text-indigo-600 hover:text-indigo-500 mb-6"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to home
+            Voltar à página inicial
           </a>
           <div className="flex justify-center mb-4">
             <Calendar className="h-12 w-12 text-indigo-600" />
           </div>
           <h2 className="text-3xl font-bold text-gray-900">
-            Create your business account
+            Cria a tua conta empresarial
           </h2>
           <p className="mt-2 text-gray-600">
-            Start managing your appointments today
+            Começa hoje a gerir os teus agendamentos
           </p>
         </div>
 
@@ -98,7 +98,7 @@ function Register() {
                 htmlFor="businessName"
                 className="block text-sm font-medium text-gray-700"
               >
-                Business Name
+                Nome do negócio
               </label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -112,7 +112,7 @@ function Register() {
                   value={formData.businessName}
                   onChange={handleChange}
                   className="pl-10 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Your Business Name"
+                  placeholder="Nome do teu negócio"
                 />
               </div>
             </div>
@@ -122,7 +122,7 @@ function Register() {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
-                Email Address
+                Endereço de email
               </label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -146,7 +146,7 @@ function Register() {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
               >
-                Password
+                Palavra-passe
               </label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -170,7 +170,7 @@ function Register() {
                 htmlFor="confirmPassword"
                 className="block text-sm font-medium text-gray-700"
               >
-                Confirm Password
+                Confirmar palavra-passe
               </label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -194,7 +194,7 @@ function Register() {
                 htmlFor="phone"
                 className="block text-sm font-medium text-gray-700"
               >
-                Phone Number
+                Número de telemóvel
               </label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -208,31 +208,31 @@ function Register() {
                   value={formData.phone}
                   onChange={handleChange}
                   className="pl-10 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="+1 (555) 000-0000"
+                  placeholder="+351 912 345 678"
                 />
               </div>
             </div>
 
             <div>
               <label
-                htmlFor="address"
+                htmlFor="location"
                 className="block text-sm font-medium text-gray-700"
               >
-                Business Address
+                Morada do negócio
               </label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <MapPin className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  id="address"
-                  name="address"
+                  id="location"
+                  name="location"
                   type="text"
                   required
-                  value={formData.address}
+                  value={formData.location}
                   onChange={handleChange}
                   className="pl-10 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="123 Business St, City, State"
+                  placeholder="Rua do Negócio, Cidade"
                 />
               </div>
             </div>
@@ -243,19 +243,19 @@ function Register() {
                 disabled={loading}
                 className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? "Creating Account..." : "Create Account"}
+                {loading ? "A criar conta..." : "Criar conta"}
               </button>
             </div>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Already have an account?{" "}
+              Já tens conta?{" "}
               <a
                 href="/login"
                 className="font-medium text-indigo-600 hover:text-indigo-500"
               >
-                Sign in
+                Iniciar sessão
               </a>
             </p>
           </div>

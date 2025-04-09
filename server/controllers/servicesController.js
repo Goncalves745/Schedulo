@@ -50,7 +50,28 @@ const deleteService = async (req, res) => {
   }
 };
 
+const getServices = async (req, res) => {
+  try {
+    const business = await prisma.business.findUnique({
+      where: { user_id: req.userId },
+    });
+    if (!business) {
+      return res.status(404).json({ error: "Empresa não encontrada." });
+    }
+
+    const services = await prisma.service.findMany({
+      where: { business_id: business.id },
+    });
+
+    res.status(200).json({ services });
+  } catch (err) {
+    console.log(err);
+    res.status(404).json({ error: "Serviço não encontrado." });
+  }
+};
+
 module.exports = {
   createService,
   deleteService,
+  getServices,
 };

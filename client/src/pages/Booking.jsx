@@ -10,11 +10,48 @@ import {
   MessageSquare,
 } from "lucide-react";
 import Api from "../api/axios";
+import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { registerLocale } from "react-datepicker";
+import pt from "date-fns/locale/pt";
+
+registerLocale("pt", pt);
+
+function generateTimeSlotsFromAvailability(availability, selectedDate) {
+  const slots = [];
+
+  if (!selectedDate) return [];
+
+  const year = selectedDate.getFullYear();
+  const month = selectedDate.getMonth();
+  const day = selectedDate.getDate();
+
+  availability.forEach((slot) => {
+    const [startHour, startMinute = 0] = slot.openTime.split(":").map(Number);
+    const [endHour, endMinute = 0] = slot.closeTime.split(":").map(Number);
+
+    const start = new Date(year, month - 1, day, startHour, startMinute);
+    const end = new Date(year, month - 1, day, endHour, endMinute);
+
+    const currentTime = new Date(start);
+
+    while (currentTime < end) {
+      const hours = currentTime.getHours().toString().padStart(2, "0");
+      const minutes = currentTime.getMinutes().toString().padStart(2, "0");
+      slots.push(`${hours}:${minutes}`);
+      currentTime.setMinutes(currentTime.getMinutes() + 30);
+    }
+  });
+
+  return slots;
+}
 
 function Booking() {
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState("");
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -22,34 +59,25 @@ function Booking() {
   const [notes, setNotes] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [availability, setAvailability] = useState([]);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
+  const fullDateTime = selectedDate
+    ? new Date(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate(),
+        ...selectedTime.split(":").map(Number)
+      )
+    : null;
 
-  // Available time slots (this would typically come from your backend)
-  const timeSlots = [
-    "09:00",
-    "09:30",
-    "10:00",
-    "10:30",
-    "11:00",
-    "11:30",
-    "12:00",
-    "12:30",
-    "13:00",
-    "13:30",
-    "14:00",
-    "14:30",
-    "15:00",
-    "15:30",
-    "16:00",
-    "16:30",
-    "17:00",
-    "17:30",
-  ];
   const token = localStorage.getItem("token");
+  const { slug } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await Api.get("/business/services", {
+        const response = await Api.get(`/public/${slug}/services`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -57,14 +85,52 @@ function Booking() {
         setServices(response.data.services);
         setError("");
       } catch (err) {
-        setError("Failed to load services. Please try again later.");
+        setError(
+          "Falha ao carregar os serviços. Por favor tente novamente mais tarde."
+        );
       } finally {
         setIsLoading(false);
       }
     };
 
+    const fetchAvailability = async () => {
+      try {
+        const response = await Api.get(`/public/${slug}/availability`, {});
+        setAvailability(response.data);
+        console.log(
+          "Dias disponíveis (dayOfWeek):",
+          response.data.map((a) => a.dayOfWeek)
+        );
+
+        setError("");
+      } catch (err) {
+        setError(
+          "Falha ao carregar disponibilidade. Por favor tente novamente mais tarde."
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAvailability();
     fetchServices();
   }, []);
+
+  useEffect(() => {
+    if (!selectedDate || availability.length === 0) return;
+
+    const jsDay = (new Date(selectedDate).getDay() + 6) % 7;
+
+    const filteredAvailability = availability.filter(
+      (slot) => slot.dayOfWeek === jsDay
+    );
+
+    const timeSlots = generateTimeSlotsFromAvailability(
+      filteredAvailability,
+      selectedDate
+    );
+    setAvailableTimeSlots(timeSlots);
+  }, [selectedDate, availability]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -73,28 +139,24 @@ function Booking() {
     try {
       const response = await Api.post("/business/appointments/create", {
         service_id: selectedService,
-        date: selectedDate,
-        time: selectedTime,
+        date: fullDateTime.toISOString(),
         client_name: name,
         client_email: email,
         client_phone: phone,
         notes: notes,
       });
 
-      // Handle successful booking
-      alert(
-        "Booking confirmed! We will send you a confirmation email shortly."
-      );
-      // Reset form
+      navigate(`/appointments/${response.data.appointmentId}`);
+
       setSelectedService("");
-      setSelectedDate("");
+      setSelectedDate(null);
       setSelectedTime("");
       setName("");
       setEmail("");
       setPhone("");
       setNotes("");
     } catch (err) {
-      setError("Failed to create booking. Please try again.");
+      setError("Falha ao criar a marcação. Por favor tente novamente.");
     } finally {
       setIsLoading(false);
     }
@@ -104,28 +166,20 @@ function Booking() {
     (service) => service.id === selectedService
   );
 
-  // Get tomorrow's date as the minimum selectable date
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const minDate = tomorrow.toISOString().split("T")[0];
+  const minDate = new Date();
+  minDate.setDate(minDate.getDate() + 1);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
-        <a
-          href="/"
-          className="inline-flex items-center text-indigo-600 hover:text-indigo-500 mb-8"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to home
-        </a>
-
         <div className="bg-white rounded-xl shadow-xl overflow-hidden">
           <div className="p-6 sm:p-8">
             <div className="flex items-center gap-3 mb-6">
               <Calendar className="h-8 w-8 text-indigo-600" />
               <h1 className="text-2xl font-bold text-gray-900">
-                Book an Appointment
+                Fazer Marcação
               </h1>
             </div>
 
@@ -136,10 +190,10 @@ function Booking() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Service Selection */}
+              {/* Serviço */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Service
+                  Seleciona o serviço
                 </label>
                 <select
                   value={selectedService}
@@ -147,7 +201,7 @@ function Booking() {
                   required
                   className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                 >
-                  <option value="">Choose a service</option>
+                  <option value="">Escolhe um serviço</option>
                   {services.map((service) => (
                     <option key={service.id} value={service.id}>
                       {service.name} - €{service.price} ({service.duration_min}{" "}
@@ -157,30 +211,39 @@ function Booking() {
                 </select>
               </div>
 
-              {/* Date Selection */}
+              {/* Data */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Date
+                  Seleciona a data
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <CalendarIcon className="h-5 w-5 text-gray-400" />
                   </div>
-                  <input
-                    type="date"
-                    min={minDate}
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    required
-                    className="pl-10 w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                  />
+                  <div className="pl-10">
+                    <DatePicker
+                      selected={selectedDate}
+                      onChange={(date) => setSelectedDate(date)}
+                      locale="pt"
+                      dateFormat="dd/MM/yyyy"
+                      minDate={minDate}
+                      placeholderText="Escolhe a data"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                      filterDate={(date) => {
+                        const jsDay = (date.getDay() + 6) % 7;
+                        return availability.some(
+                          (slot) => slot.dayOfWeek === jsDay
+                        );
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Time Selection */}
+              {/* Hora */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Time
+                  Seleciona a hora
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -192,8 +255,8 @@ function Booking() {
                     required
                     className="pl-10 w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                   >
-                    <option value="">Choose a time</option>
-                    {timeSlots.map((time) => (
+                    <option value="">Escolhe uma hora</option>
+                    {availableTimeSlots.map((time) => (
                       <option key={time} value={time}>
                         {time}
                       </option>
@@ -202,11 +265,11 @@ function Booking() {
                 </div>
               </div>
 
-              {/* Personal Information */}
+              {/* Informações Pessoais */}
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Your Name
+                    O teu nome
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -218,7 +281,7 @@ function Booking() {
                       onChange={(e) => setName(e.target.value)}
                       required
                       className="pl-10 w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                      placeholder="John Doe"
+                      placeholder="João Silva"
                     />
                   </div>
                 </div>
@@ -237,14 +300,14 @@ function Booking() {
                       onChange={(e) => setEmail(e.target.value)}
                       required
                       className="pl-10 w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                      placeholder="john@example.com"
+                      placeholder="joao@exemplo.com"
                     />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number
+                    Número de telemóvel
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -256,14 +319,14 @@ function Booking() {
                       onChange={(e) => setPhone(e.target.value)}
                       required
                       className="pl-10 w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                      placeholder="+1 (555) 000-0000"
+                      placeholder="+351 912 345 678"
                     />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Additional Notes
+                    Notas adicionais
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 pt-3 pointer-events-none">
@@ -274,39 +337,42 @@ function Booking() {
                       onChange={(e) => setNotes(e.target.value)}
                       rows={3}
                       className="pl-10 w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                      placeholder="Any special requests or notes..."
+                      placeholder="Algum pedido especial ou nota..."
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Booking Summary */}
+              {/* Resumo */}
               {selectedServiceDetails && (
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    Booking Summary
+                    Resumo da Marcação
                   </h3>
                   <div className="space-y-2 text-sm text-gray-600">
-                    <p>Service: {selectedServiceDetails.name}</p>
+                    <p>Serviço: {selectedServiceDetails.name}</p>
                     <p>
-                      Duration: {selectedServiceDetails.duration_min} minutes
+                      Duração: {selectedServiceDetails.duration_min} minutos
                     </p>
-                    <p>Price: €{selectedServiceDetails.price}</p>
+                    <p>Preço: €{selectedServiceDetails.price}</p>
                     {selectedDate && (
-                      <p>Date: {new Date(selectedDate).toLocaleDateString()}</p>
+                      <p>
+                        Data:{" "}
+                        {new Date(selectedDate).toLocaleDateString("pt-PT")}
+                      </p>
                     )}
-                    {selectedTime && <p>Time: {selectedTime}</p>}
+                    {selectedTime && <p>Hora: {selectedTime}</p>}
                   </div>
                 </div>
               )}
 
-              {/* Submit Button */}
+              {/* Botão Submeter */}
               <button
                 type="submit"
                 disabled={isLoading}
                 className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? "Processing..." : "Confirm Booking"}
+                {isLoading ? "A processar..." : "Confirmar Marcação"}
               </button>
             </form>
           </div>

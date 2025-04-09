@@ -17,7 +17,7 @@ function Landing() {
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Calendar className="h-6 w-6 text-indigo-600" />
+            <Calendar className="h-6 w-6 text-primary-600" />
             <span className="text-xl font-bold text-gray-900">Schedulo</span>
           </div>
           <div className="flex items-center gap-6">
@@ -32,7 +32,7 @@ function Landing() {
             </a>
             <a
               href="/register"
-              className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+              className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors"
             >
               Criar Conta
             </a>
@@ -69,8 +69,8 @@ function Landing() {
                 className="rounded-2xl shadow-2xl"
               />
               <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-lg shadow-lg flex items-center gap-3">
-                <div className="bg-green-100 p-2 rounded-full">
-                  <Star className="h-6 w-6 text-green-600" />
+                <div className="bg-primary-100 p-2 rounded-full">
+                  <Star className="h-6 w-6 text-primary-600" />
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">
@@ -142,7 +142,7 @@ function Landing() {
                 Pronto para otimizar o teu negócio?
               </h2>
               <p className="text-indigo-100 text-lg">
-                Junta-te as empresas em todo o país que já estão a usar Schedulo
+                Junta-te às empresas em todo o país que já utilizam o Schedulo
               </p>
             </div>
             <a
@@ -165,7 +165,7 @@ function Landing() {
                 <span className="text-xl font-bold text-white">Schedulo</span>
               </div>
               <p className="text-gray-400">
-                Solução moderna para agendamento e gestão de marcações
+                Solução moderna para marcação e gestão de serviços
               </p>
             </div>
             <div>

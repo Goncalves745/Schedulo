@@ -41,6 +41,7 @@ CREATE TABLE "Appointment" (
     "service_id" TEXT NOT NULL,
     "client_name" TEXT NOT NULL,
     "client_email" TEXT NOT NULL,
+    "client_phone" TEXT NOT NULL,
     "date" TIMESTAMP(3) NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

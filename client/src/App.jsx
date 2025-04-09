@@ -5,7 +5,8 @@ import Services from "./pages/Services";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Landing from "./pages/Landing";
-import Appointments from "./pages/Appointments";
+import Appointments from "./pages/Booking";
+import AppointmentConfirmation from "./pages/AppointmentConfirmation";
 import "./index.css";
 function App() {
   return (
@@ -30,14 +31,8 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/business/appointments"
-          element={
-            <ProtectedRoute>
-              <Appointments />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/booking/:slug" element={<Appointments />} />
+        <Route path="/appointments/:id" element={<AppointmentConfirmation />} />
       </Routes>
     </BrowserRouter>
   );
