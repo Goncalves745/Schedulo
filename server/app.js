@@ -17,7 +17,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(cors({
-  origin: "https://schedulo-omega.vercel.app/", 
+  origin: "https://schedulo-omega.vercel.app", 
 }));
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
