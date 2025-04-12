@@ -409,7 +409,7 @@ function Dashboard() {
                         <div className="text-right">
                           <p className="font-medium text-gray-900">
                             {new Date(appointment.date).toLocaleString(
-                              "en-US",
+                              "pt-PT",
                               {
                                 hour: "2-digit",
                                 minute: "2-digit",
@@ -418,10 +418,13 @@ function Dashboard() {
                           </p>
                           <p className="text-sm text-gray-500">
                             {new Date(appointment.date).toLocaleString(
-                              "en-US",
+                              "pt-PT",
                               {
-                                month: "short",
+                                weekday: "short",
                                 day: "numeric",
+                                month: "short",
+                                hour: "2-digit",
+                                minute: "2-digit",
                               }
                             )}
                           </p>
@@ -438,14 +441,14 @@ function Dashboard() {
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-lg font-semibold text-gray-900">
-                  All Appointments
+                  Todas as Marcações
                 </h2>
                 <button
                   onClick={() => navigate(slug)}
                   className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                 >
                   <Plus className="h-4 w-4" />
-                  New Appointment
+                  Nova marcação
                 </button>
               </div>
 
@@ -583,7 +586,7 @@ function Dashboard() {
                         </div>
                         <div className="flex items-center gap-6">
                           <p className="font-medium text-gray-900">
-                            €{service.price}
+                            {service.price}€
                           </p>
                           <button
                             onClick={() => handleDelete(service.id)}
@@ -604,7 +607,7 @@ function Dashboard() {
                 className="bg-white rounded-xl shadow-sm p-6"
               >
                 <h3 className="text-lg font-semibold text-gray-900 mb-6">
-                  Add New Service
+                  Adicionar novo serviço
                 </h3>
                 <form
                   onSubmit={handleSubmit}
@@ -612,7 +615,7 @@ function Dashboard() {
                 >
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Service Name
+                      Nome do serviço
                     </label>
                     <input
                       type="text"
@@ -625,7 +628,7 @@ function Dashboard() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Price (€)
+                      Preço (€)
                     </label>
                     <input
                       type="number"
@@ -640,7 +643,7 @@ function Dashboard() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Duration (minutes)
+                      Duração (minutos)
                     </label>
                     <input
                       type="number"
@@ -661,12 +664,12 @@ function Dashboard() {
                       {isLoading ? (
                         <>
                           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                          <span>Adding Service...</span>
+                          <span>A adicionar serviço...</span>
                         </>
                       ) : (
                         <>
                           <Plus className="h-5 w-5" />
-                          <span>Add Service</span>
+                          <span>Adicionar serviço</span>
                         </>
                       )}
                     </button>

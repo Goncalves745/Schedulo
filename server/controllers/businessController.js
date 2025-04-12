@@ -98,7 +98,11 @@ const createHorario = async (req, res) => {
       data: dataToInsert,
     });
 
-    res.status(201).json({ message: "Horários atualizados com sucesso!" });
+    const horariosCriados = await prisma.businessHours.findMany({
+      where: { businessId: existingBusiness.id },
+    });
+
+    res.status(200).json({ data: horariosCriados });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Erro ao atualizar os horários." });

@@ -65,8 +65,8 @@ const createPublicAppointment = async (req, res) => {
     }
     res.status(201).json({ appointmentId: newAppointment.id });
   } catch (err) {
-    res.status(500).json({ error: "Erro ao criar agendamento." });
-    console.log(err);
+    console.error("Erro ao criar marcação:", err);
+    res.status(500).json({ error: "Erro ao criar marcação." });
   }
 };
 

@@ -19,7 +19,11 @@ import pt from "date-fns/locale/pt";
 
 registerLocale("pt", pt);
 
-function generateTimeSlotsFromAvailability(availability, selectedDate) {
+function generateTimeSlotsFromAvailability(
+  availability,
+  selectedDate,
+  duration
+) {
   const slots = [];
 
   if (!selectedDate) return [];
@@ -32,16 +36,16 @@ function generateTimeSlotsFromAvailability(availability, selectedDate) {
     const [startHour, startMinute = 0] = slot.openTime.split(":").map(Number);
     const [endHour, endMinute = 0] = slot.closeTime.split(":").map(Number);
 
-    const start = new Date(year, month - 1, day, startHour, startMinute);
-    const end = new Date(year, month - 1, day, endHour, endMinute);
+    const start = new Date(year, month, day, startHour, startMinute);
+    const end = new Date(year, month, day, endHour, endMinute);
 
     const currentTime = new Date(start);
 
-    while (currentTime < end) {
+    while (currentTime.getTime() + duration * 60000 <= end.getTime()) {
       const hours = currentTime.getHours().toString().padStart(2, "0");
       const minutes = currentTime.getMinutes().toString().padStart(2, "0");
       slots.push(`${hours}:${minutes}`);
-      currentTime.setMinutes(currentTime.getMinutes() + 30);
+      currentTime.setMinutes(currentTime.getMinutes() + duration);
     }
   });
 
@@ -73,6 +77,10 @@ function Booking() {
   const token = localStorage.getItem("token");
   const { slug } = useParams();
   const navigate = useNavigate();
+
+  const selectedServiceDetails = services.find(
+    (service) => service.id === selectedService
+  );
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -117,7 +125,8 @@ function Booking() {
   }, []);
 
   useEffect(() => {
-    if (!selectedDate || availability.length === 0) return;
+    if (!selectedDate || availability.length === 0 || !selectedServiceDetails)
+      return;
 
     const jsDay = (new Date(selectedDate).getDay() + 6) % 7;
 
@@ -125,12 +134,14 @@ function Booking() {
       (slot) => slot.dayOfWeek === jsDay
     );
 
+    const duration = selectedServiceDetails?.duration_min;
     const timeSlots = generateTimeSlotsFromAvailability(
       filteredAvailability,
-      selectedDate
+      selectedDate,
+      duration
     );
     setAvailableTimeSlots(timeSlots);
-  }, [selectedDate, availability]);
+  }, [selectedDate, availability, selectedServiceDetails]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -161,10 +172,6 @@ function Booking() {
       setIsLoading(false);
     }
   };
-
-  const selectedServiceDetails = services.find(
-    (service) => service.id === selectedService
-  );
 
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -320,24 +327,6 @@ function Booking() {
                       required
                       className="pl-10 w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                       placeholder="+351 912 345 678"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Notas adicionais
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 pt-3 pointer-events-none">
-                      <MessageSquare className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <textarea
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      rows={3}
-                      className="pl-10 w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                      placeholder="Algum pedido especial ou nota..."
                     />
                   </div>
                 </div>

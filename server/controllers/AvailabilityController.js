@@ -98,7 +98,6 @@ const getPublicAvailability = async (req, res) => {
       },
     });
 
-    console.log("Horários encontrados:", availability);
     res.status(200).json(availability);
   } catch (err) {
     console.log(err);

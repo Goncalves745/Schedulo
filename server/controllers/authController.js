@@ -53,24 +53,28 @@ const signup = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  const { email, password } = req.body;
-  const user = await prisma.user.findUnique({ where: { email } });
+  try {
+    const { email, password } = req.body;
+    const user = await prisma.user.findUnique({ where: { email } });
 
-  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-    expiresIn: "7d",
-  });
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
-  if (!user) {
-    return res.status(401).json({ error: "Credenciais inválidas" });
+    if (!user) {
+      return res.status(401).json({ error: "Credenciais inválidas" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Credenciais inválidas" });
+    }
+
+    res.status(200).json({ token });
+  } catch (err) {
+    res.status(401).json({ body: err });
   }
-
-  const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-
-  if (!isPasswordValid) {
-    return res.status(401).json({ error: "Credenciais inválidas" });
-  }
-
-  res.status(200).json({ token });
 };
 
 module.exports = {

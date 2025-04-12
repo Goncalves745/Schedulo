@@ -4,12 +4,12 @@ const prisma = new PrismaClient();
 const createService = async (req, res) => {
   const { name, price, duration_min } = req.body;
 
-  const business = await prisma.business.findUnique({
-    where: { user_id: req.userId },
-  });
-
   try {
-    await prisma.service.create({
+    const business = await prisma.business.findUnique({
+      where: { user_id: req.userId },
+    });
+
+    const newService = await prisma.service.create({
       data: {
         name,
         price,
@@ -17,10 +17,11 @@ const createService = async (req, res) => {
         business_id: business.id,
       },
     });
-    res.status(201).json({ message: "Serviço criado com sucesso!" });
+
+    res.status(201).json(newService); // ← devolve o serviço criado
   } catch (err) {
-    res.status(500).json({ error: "Erro ao criar serviço." });
     console.log(err);
+    res.status(500).json({ error: "Erro ao criar serviço." });
   }
 };
 
