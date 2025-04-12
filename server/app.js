@@ -14,7 +14,7 @@ dotenv.config();
 const app = express();
 
 const allowedOrigins = [
-  "https://schedulo-omega.vercel.app",
+  "https://schedulo-alpha.vercel.app",
   "http://localhost:5173",
 ];
 
